@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<title> {{ title }} </title>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2 p-0">
+            <nav class="navbar navbar-dark d-block">
+                <a class="navbar-brand" href="{{ url_for('index') }}">TTN Analysis Helper</a>
+                <div class="form-group">
+                    <input class="form-control btn btn-light" type="button" value="Go Back"
+                        onclick="history.back(-1)" />
+                </div>
+                <div class="form-group">
+                    <a name="visualize" id="visualize" class="form-control btn btn-secondary"
+                        href="{{ url_for('visualize') }}">Visualizations</a>
+                </div>
+            </nav>
+        </div>
+        <div class="col-10">
+        </div>
+    </div>
+</div>
+
+{% endblock %}

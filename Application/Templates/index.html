@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% if refresh == True %}
+<meta http-equiv="refresh" content="5">
+{% endif %}
+
+{% if refresh == False %}
+<script>
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+</script>
+{% endif %}
+
+<title> {{ title }} </title>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <div class="row">
+        <!-- Start nav -->
+        <div class="col-md-2 col-xs-12 p-0">
+            <nav class="navbar navbar-dark d-block">
+                <a class="navbar-brand" href="{{ url_for('index') }}">TTN Analysis Helper</a>
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="userpass" class="text-white">Enter your username:</label>
+                        <input id="userpass" name="userpass" class="form-control mr-sm-2" type="search"
+                            placeholder="{{ username }}" aria-label="">
+                    </div>
+                    <div class="form-group">
+                        {% if success == 'success' %}
+                        <button id="stop" name="stop" class="form-control btn btn-danger" type="submit" value="Stop"
+                            {{ stop_connect }}>Stop
+                            Connect</button>
+                        <button id="save" name="save" class="form-control btn btn-dark mt-1" type="submit" value="Save"
+                            {{ save_button }}>Save
+                            Information</button>
+                        <button id="stop_back" name="stop_back" class="form-control btn btn-dark mt-1" type="submit"
+                            value="Stop_Back">Go Back</button>
+                        {% else %}
+                        <button class="form-control btn btn-light" type="submit">Connect</button>
+                        {% endif %}
+                    </div>
+                </form>
+                <a name="visualize" id="visualize" class="form-control btn btn-secondary"
+                    href="{{ url_for('visualize') }}">Visualizations</a>
+            </nav>
+        </div>
+        <!-- End nav -->
+        <div class="col-md-10 col-xs-12">
+            <p class="h4 py-4 TEXT-UPPERCASE"> {{ response }} </p>
+            {% if success == 'success' %}
+            <div class="row">
+                <!-- Device Info-->
+                <div class="col">
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col" colspan="2">Device Information</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, value in device_info.items() %}
+                            <tr>{% if key == 'Device Location' %}
+                                <th scope="row">{{ key }}</th>
+                                <td> <a href="https://www.google.com/maps/?q={{ value }}" target="_blank">location
+                                        map</a></td>
+                                {% else %}
+                                <th scope="row">{{ key }}</th>
+                                <td> {{ value }}</td>
+                            </tr>{% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <!-- Service Info-->
+                <div class="col">
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col" colspan="2">Service Information</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, value in service_info.items() %}
+                            <tr>
+                                <th scope="row">{{ key }}</th>
+                                <td> {{ value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <!-- Gateway Info-->
+                <div class="col">
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col" colspan="2">Gateway Information</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for each in gateway_info.values() %} {% for key, value in each.items() %}
+                            <tr>{% if key == 'Gateway Location' %}
+                                <th scope="row">{{ key }}</th>
+                                <td> <a href="https://www.google.com/maps/?q={{ value }}" target="_blank">location
+                                        map</a></td>
+                                {% else %}
+                                <th scope="row">{{ key }}</th>
+                                <td> {{ value }}</td>
+                            </tr>{% endif %}
+                            {% endfor %} {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <!-- Connection Info-->
+                <div class="col">
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col" colspan="2">Connection Information</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for each in connection_info.values() %} {% for key, value in each.items() %}
+                            <tr>
+                                <th scope="row">{{ key }}</th>
+                                <td> {{ value }}</td>
+                            </tr>
+                            {% endfor %} {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div> <!-- End container -->
+
+{% endblock %}
