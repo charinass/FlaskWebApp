@@ -1,5 +1,7 @@
+from .App import views
 from flask import Flask
 from .models import db
+
 
 def create_app():
     app = Flask(__name__)
@@ -9,9 +11,10 @@ def create_app():
 
     db.init_app(app)
 
+    # to create db
+    # db.create_all()
+
     return app
 
 
 app = create_app()
-
-from .App import views
