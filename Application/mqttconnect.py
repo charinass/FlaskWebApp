@@ -43,7 +43,8 @@ def on_message(client, userdata, msg):
     global_list['device_info'] = dict(zip(device_titles, device_info_list))
 
     # Service info
-    service_time = themsg["metadata"]["time"]
+    service_time = (themsg["metadata"]["time"][0:10],
+                    themsg["metadata"]["time"][11:30])
     service_status = struct.unpack('B', payload_plain[0:1])[0]
     service_water_ml = struct.unpack('H', payload_plain[1:3])[0]
     service_countdown_timer = struct.unpack('I', payload_plain[9:13])[0]

@@ -55,7 +55,7 @@
         <!-- End nav -->
         <div class="col-md-10 col-xs-12">
             <p class="h4 py-4 TEXT-UPPERCASE"> {{ response }} </p>
-            {% if success == 'success' %}
+            {% if success == 'success' and empty != True%}
             <div class="row">
                 <!-- Device Info-->
                 <div class="col">
