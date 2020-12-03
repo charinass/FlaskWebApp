@@ -88,19 +88,21 @@
                     </table>
                 </div>
             </div>
-            <!-- <div class="row">
+            {% if active != "" %}
+            <div class="row">
                 <div class="dropdown col pt-4">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         {{ graph_type }}
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="/visualizations/{{ 'line_graph' }}">Line Graph</a>
+                        <a class="dropdown-item" href="/visualizations/{{ active }}/{{ 'line_graph' }}">Line Graph</a>
                         <a class="dropdown-item" href="#">Another action</a>
-                        <a class="dropdown-item" href="/visualizations/{{ 'map_graph' }}">Show Location</a>
+                        <a class="dropdown-item" href="/visualizations/{{ active }}/{{ 'map_graph' }}">Show Location</a>
                     </div>
                 </div>
-            </div> -->
+            </div>
+            {% endif %}
             <div class="row chart" id="graph">
                 <script type="text/javascript">
                     var graphs = {{ plot | safe }};

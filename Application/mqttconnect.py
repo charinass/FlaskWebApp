@@ -16,7 +16,7 @@ service_info = {}
 gateway_info = {}
 connection_info = {}
 
-report_message = ""
+is_username_valid = True
 
 
 def on_connect(client, userdata, flags, rc):
@@ -112,6 +112,8 @@ def start(username, password, broker, topic):
     THE_BROKER = broker
     THE_TOPIC = topic
     try:
+        global is_username_valid
+        is_username_valid = True
         client.username_pw_set(TTN_USERNAME, password=TTN_PASSWORD)
         client.on_connect = on_connect
         client.on_message = on_message
@@ -120,10 +122,8 @@ def start(username, password, broker, topic):
 
     except:
         print('Failed to connect.')
-        client.disconnect()
-        global report_message
-        report_message = False
+        is_username_valid = False
 
 
-def return_message():
-    return report_message
+def check_username_valid():
+    return is_username_valid

@@ -4,7 +4,7 @@ from markupsafe import Markup
 from werkzeug.utils import redirect
 
 from Application.models import db, TTN_User, Device, Service, Gateway, Connection
-from Application.mqttconnect import start, get_data, client, return_message
+from Application.mqttconnect import start, get_data, client, check_username_valid
 from Application.graphs import query_tables, create_plot, get_map
 from Application import app
 
@@ -34,7 +34,6 @@ def index():
 
 @app.route('/addUser/', methods=['GET', 'POST'])
 def add_user():
-    client.disconnect()
     if request.method == 'POST':
         if request.form.get('submit_new_user'):
             new_username = request.form['new_username']
@@ -42,18 +41,16 @@ def add_user():
             new_broker = request.form['new_broker']
             new_topic = request.form['new_topic']
 
-            start(new_username, new_passphrase,
-                  new_broker, new_topic)
+            start(new_username, new_passphrase, new_broker, new_topic)
 
-            if return_message() == False:
+            if check_username_valid() == False:
                 report = f'User {new_username} does not exist in The Things Network. New user not saved. Register ' + \
                     Markup(
                         "<a href='https://account.thethingsnetwork.org/register' target='_blank'>Here</a>")
-            else:
+            elif check_username_valid() == True:
                 if (TTN_User.query.filter(new_username == TTN_User.username).first()) is not None:
                     report = f'User {new_username} already exist.'
                     client.disconnect()
-
                 else:
 
                     new_user = TTN_User(
@@ -62,11 +59,12 @@ def add_user():
                     try:
                         db.session.add(new_user)
                         db.session.commit()
+                        report = f'New user: {new_username} added to database. You may now connect. ' + Markup(
+                            "<a href='/'>CONNECT</a>")
+                        client.disconnect()
+
                     except:
                         print("Error adding to table TTN_User.")
-
-                    report = f'New user: {new_username} added to database. You may now connect. ' + Markup(
-                        "<a href='/'>CONNECT</a>")
 
             return render_template('index.html', adduser=True, back_button=True, new_username=new_username, new_passphrase=new_passphrase, new_broker=new_broker, new_topic=new_topic, report=report)
 
@@ -207,7 +205,7 @@ def save_data():
 
 @ app.route('/visualizations/')
 def visualize():
-    return render_template('visualizations.html', title='Visualizations')
+    return render_template('visualizations.html', title='Visualizations', active='')
 
 
 @app.route('/visualizations/<table_name>')
@@ -221,11 +219,11 @@ def get_table(table_name):
         df_column_names = df.columns
         df_table = df.to_numpy(dtype=str)
 
-        return render_template('visualizations.html', title='Visualizations', active=table_name, df_column_names=df_column_names, df_table=df_table)
+        return render_template('visualizations.html', title='Visualizations', active=table_name, df=df, df_column_names=df_column_names, df_table=df_table)
 
 
-@ app.route('/visualizations/<table_name>/<graph>', methods=['GET', 'POST'])
-def show_graph(graph):
+@app.route('/visualizations/<table_name>/<graph>', methods=['GET', 'POST'])
+def show_graph(table_name, graph):
     if graph == 'line_graph':
         get_line_plot = create_plot()
 
