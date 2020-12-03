@@ -14,7 +14,9 @@
     integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
     crossorigin="anonymous"></script>
 
+
 <title> {{ title }} </title>
+
 
 {% endblock %}
 
@@ -36,23 +38,84 @@
             </nav>
         </div>
         <div class="col-md-10 col-xs-12">
-            <div class="dropdown p-4">
-                <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{ graph_type }}
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="/visualizations/{{ 'line_graph' }}">Line Graph</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
+            <div class="row">
+                <div class="col">
+                    <p class="h4 mt-4 text-danger TEXT-UPPERCASE"> {{ response }} </p>
                 </div>
             </div>
-            <div class="chart" id="graph">
-                <script>
+            <div class="row">
+                <div class="col px-0 py-2">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link {% if active == 'Device' %} {{ 'active' }} {% endif %}"
+                                href="/visualizations/{{ 'Device' }}">Device
+                                Graphs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if active == 'Service' %} {{ 'active' }} {% endif %}"
+                                href="/visualizations/{{ 'Service' }}">Service Graphs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if active == 'Gateway' %} {{ 'active' }} {% endif %}"
+                                href="/visualizations/{{ 'Gateway' }}">Gateway Graphs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if active == 'Connection' %} {{ 'active' }} {% endif %}"
+                                href="/visualizations/{{ 'Connection' }}">Connection Graphs</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                {% for each in df_column_names %}
+                                <th scope="col">{{ each }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for each in df_table %}
+                            <tr>
+                                {% for item in each %}
+                                <td>{{ item }}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- <div class="row">
+                <div class="dropdown col pt-4">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{ graph_type }}
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="/visualizations/{{ 'line_graph' }}">Line Graph</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <a class="dropdown-item" href="/visualizations/{{ 'map_graph' }}">Show Location</a>
+                    </div>
+                </div>
+            </div> -->
+            <div class="row chart" id="graph">
+                <script type="text/javascript">
                     var graphs = {{ plot | safe }};
                     Plotly.plot('graph', graphs, {});
                 </script>
             </div>
+            {% if show_maps == True %}
+            <div class="row">
+                <div class="embed-responsive embed-responsive-4by3 col-6">
+                    <iframe class="embed-responsive-item"
+                        src="https://maps.google.com/maps?output=embed&q={{ map_data }}" allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

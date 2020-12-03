@@ -16,6 +16,8 @@ service_info = {}
 gateway_info = {}
 connection_info = {}
 
+report_message = ""
+
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to ", client._host, "port: ", client._port)
@@ -109,8 +111,20 @@ def start(username, password, broker, topic):
     TTN_PASSWORD = password
     THE_BROKER = broker
     THE_TOPIC = topic
-    client.username_pw_set(TTN_USERNAME, password=TTN_PASSWORD)
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.connect(THE_BROKER, 1883, 60)
-    client.loop_start()
+    try:
+        client.username_pw_set(TTN_USERNAME, password=TTN_PASSWORD)
+        client.on_connect = on_connect
+        client.on_message = on_message
+        client.connect(THE_BROKER, 1883, 60)
+        client.loop_start()
+
+    except:
+        print('Failed to connect.')
+        client.disconnect()
+        global report_message
+        report_message = False
+        return_message()
+
+
+def return_message():
+    return report_message

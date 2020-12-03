@@ -1,11 +1,11 @@
 from flask import render_template, request
 from flask.helpers import url_for
-from pandas.core.construction import is_empty_data
+from markupsafe import Markup
 from werkzeug.utils import redirect
 
 from Application.models import db, TTN_User, Device, Service, Gateway, Connection
-from Application.mqttconnect import start, get_data, client
-from Application.graphs import create_plot
+from Application.mqttconnect import start, get_data, client, return_message
+from Application.graphs import query_tables, create_plot, get_map
 from Application import app
 
 
@@ -14,6 +14,7 @@ display = []
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    client.disconnect()
     if request.method == 'POST':
         userpass = request.form['userpass']
         if (TTN_User.query.filter(userpass == TTN_User.username).scalar() is not None):
@@ -31,7 +32,48 @@ def index():
         return render_template('index.html', title='Home')
 
 
-@app.route('/start_receiving', methods=['GET', 'POST'])
+@app.route('/addUser/', methods=['GET', 'POST'])
+def add_user():
+    client.disconnect()
+    if request.method == 'POST':
+        if request.form.get('submit_new_user'):
+            new_username = request.form['new_username']
+            new_passphrase = request.form['new_passphrase']
+            new_broker = request.form['new_broker']
+            new_topic = request.form['new_topic']
+
+            start(new_username, new_passphrase,
+                  new_broker, new_topic)
+
+            if return_message() == False:
+                report = f'User {new_username} does not exist in The Things Network. New user not saved. Register ' + \
+                    Markup(
+                        "<a href='https://account.thethingsnetwork.org/register'>Here</a>")
+            else:
+                if (TTN_User.query.filter(new_username == TTN_User.username).first()) is not None:
+                    report = f'User {new_username} already exist.'
+                    client.disconnect()
+
+                else:
+
+                    new_user = TTN_User(
+                        username=new_username, password=new_passphrase, broker=new_broker, topic=new_topic)
+
+                    try:
+                        db.session.add(new_user)
+                        db.session.commit()
+                    except:
+                        print("Error adding to table TTN_User.")
+
+                    report = f'New user: {new_username} added to database. You may now connect. ' + Markup(
+                        "<a href='/'>CONNECT</a>")
+
+            return render_template('index.html', adduser=True, back_button=True, new_username=new_username, new_passphrase=new_passphrase, new_broker=new_broker, new_topic=new_topic, report=report)
+
+    return render_template('index.html', adduser=True, back_button=True)
+
+
+@app.route('/startReceiving', methods=['GET', 'POST'])
 def start_receive():
     if request.method == 'GET':
         username = request.args.get('username')
@@ -158,19 +200,36 @@ def save_data():
             response = 'Tables are empty. Could not save any data.'
             return render_template('index.html', title='Device Page', success='success', refresh=False, stop_connect='disabled', save_button='disabled', empty=True, response=response)
 
-        # return render_template('index.html', title='Device Page', success='success', refresh=False, stop_connect='disabled', save_button='disabled', device_info=display[0], service_info=display[1], gateway_info=display[2], connection_info=display[3])
-
     elif request.form.get('stop_back'):
+        client.disconnect()
         return redirect('/')
 
 
 @ app.route('/visualizations/')
 def visualize():
-    return render_template('visualizations.html', title='Visualizations', graph_type='Select a graph')
+    return render_template('visualizations.html', title='Visualizations')
 
 
-@ app.route('/visualizations/<graph>', methods=['GET', 'POST'])
+@app.route('/visualizations/<table_name>')
+def get_table(table_name):
+    df = query_tables(table_name)
+    print(df)
+    if df.empty:
+        return render_template('visualizations.html', title='Visualizations', response='Table does not exist.')
+
+    else:
+        df_column_names = df.columns
+        df_table = df.to_numpy(dtype=str)
+
+        return render_template('visualizations.html', title='Visualizations', active=table_name, df_column_names=df_column_names, df_table=df_table)
+
+
+@ app.route('/visualizations/<table_name>/<graph>', methods=['GET', 'POST'])
 def show_graph(graph):
     if graph == 'line_graph':
         get_line_plot = create_plot()
+
         return render_template('visualizations.html', title='Visualizations', graph_type='Line Graph', plot=get_line_plot)
+    elif graph == 'map_graph':
+        get_map_data = get_map()
+        return render_template('visualizations.html', title='Visualizations', graph_type='Location', show_maps=True, map_data=get_map_data)

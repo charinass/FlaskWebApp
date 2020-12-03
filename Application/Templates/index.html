@@ -28,11 +28,13 @@
             <nav class="navbar navbar-dark d-block">
                 <a class="navbar-brand" href="{{ url_for('index') }}">TTN Analysis Helper</a>
                 <form method="POST">
+                    {% if back_button != True %}
                     <div class="form-group">
                         <label for="userpass" class="text-white">Enter your username:</label>
                         <input id="userpass" name="userpass" class="form-control mr-sm-2" type="search"
                             placeholder="{{ username }}" aria-label="">
                     </div>
+                    {% endif %}
                     <div class="form-group">
                         {% if success == 'success' %}
                         <button id="stop" name="stop" class="form-control btn btn-danger" type="submit" value="Stop"
@@ -44,17 +46,59 @@
                         <button id="stop_back" name="stop_back" class="form-control btn btn-dark mt-1" type="submit"
                             value="Stop_Back">Go Back</button>
                         {% else %}
+                        {% if back_button != True %}
                         <button class="form-control btn btn-light" type="submit">Connect</button>
+                        {% endif %}
                         {% endif %}
                     </div>
                 </form>
-                <a name="visualize" id="visualize" class="form-control btn btn-secondary"
+                {% if back_button == True %}
+                <input class="form-control btn btn-light my-3" type="button" value="Go Back"
+                    onclick="history.back(-1)" />
+                {% endif %}
+
+                <a name="adduser" id="adduser" class="form-control btn btn-light" href="{{ url_for('add_user') }}">Add
+                    User</a>
+
+                <a name="visualize" id="visualize" class="form-control btn btn-light mt-3"
                     href="{{ url_for('visualize') }}">Visualizations</a>
+
             </nav>
         </div>
         <!-- End nav -->
         <div class="col-md-10 col-xs-12">
             <p class="h4 py-4 TEXT-UPPERCASE"> {{ response }} </p>
+            <!-- addUser user form -->
+            {% if adduser == True %}
+            <form method="POST">
+                <div class="form-row">
+                    <div class="col">
+                        <input id="new_username" name="new_username" type="text" class="form-control"
+                            placeholder="Username">
+                    </div>
+                    <div class="col">
+                        <input id="new_passphrase" name="new_passphrase" type="text" class="form-control"
+                            placeholder="TTN Passphrase">
+                    </div>
+                    <div class="col">
+                        <input id="new_broker" name="new_broker" type="text" class="form-control"
+                            placeholder="TTN Broker">
+                    </div>
+                    <div class="col">
+                        <input id="new_topic" name="new_topic" type="text" class="form-control" placeholder="TTN Topic">
+                    </div>
+                    <div class="col">
+                        <input id="submit_new_user" name="submit_new_user" type="submit" class="btn btn-success"
+                            value="Check">
+                    </div>
+                </div>
+            </form>
+            {% endif %}
+            {% if new_username == "" or new_passphrase == "" or new_broker == "" or new_topic == "" %}
+            <p class="text-danger p-2"> All fields should be filled. </p>
+            {% endif %}
+            <p class="text-danger p-2">{{ report }}</p>
+            <!-- End of addUser form-->
             {% if success == 'success' and empty != True%}
             <div class="row">
                 <!-- Device Info-->
