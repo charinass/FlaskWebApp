@@ -48,7 +48,7 @@ def add_user():
             if return_message() == False:
                 report = f'User {new_username} does not exist in The Things Network. New user not saved. Register ' + \
                     Markup(
-                        "<a href='https://account.thethingsnetwork.org/register'>Here</a>")
+                        "<a href='https://account.thethingsnetwork.org/register' target='_blank'>Here</a>")
             else:
                 if (TTN_User.query.filter(new_username == TTN_User.username).first()) is not None:
                     report = f'User {new_username} already exist.'
