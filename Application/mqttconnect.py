@@ -123,7 +123,6 @@ def start(username, password, broker, topic):
         client.disconnect()
         global report_message
         report_message = False
-        return_message()
 
 
 def return_message():
