@@ -79,18 +79,6 @@ def create_plot():
     fig1 = px.line(df, x='Time', y=[
                    'Voltage Max [V]', 'Voltage Min [V]'], title='Supply Voltage Graph')
 
-    # N = 40
-    # x = np.linspace(0, 1, N)
-    # y = np.random.randn(N)
-    # df = pd.DataFrame({'x': x, 'y': y})  # creating a sample dataframe
-
-    # data = [
-    #     graph_obj.Bar(
-    #         x=df['x'],  # assign x as the dataframe column 'x'
-    #         y=df['y']
-    #     )
-    # ]
-
     graph_in_json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
 
     return graph_in_json
@@ -106,7 +94,3 @@ def get_map():
         Gateway.location).all(), columns=['Device Location', 'Gateway Location'])
     print(df)
     return df['Device Location'][5]
-
-
-def get_table():
-    pass
