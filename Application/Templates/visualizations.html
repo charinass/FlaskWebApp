@@ -85,8 +85,10 @@
                                 {% for item in each %}
                                 <td>{{ item }}</td>
                                 {% endfor %}
-                                <td><a class="badge badge-primary" href="">UPDATE</a><br>
-                                    <a class="badge badge-danger mt-1" href="">DELETE</a>
+                                <td><a class="badge badge-primary"
+                                        href="/visualizations/update/{{ each[0] }}">UPDATE</a><br>
+                                    <a class="badge badge-danger mt-1"
+                                        href="/visualizations/delete/{{ each[0] }}">DELETE</a>
                                 </td>
                             </tr>
                             {% endfor %}
