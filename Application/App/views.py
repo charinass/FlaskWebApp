@@ -221,6 +221,9 @@ def get_table(table_name):
 
         return render_template('visualizations.html', title='Visualizations', active=table_name, df=df, df_column_names=df_column_names, df_table=df_table)
 
+@app.route('/visualizations/delete/<id>')
+def delete(id):
+    pass
 
 @app.route('/visualizations/<table_name>/<graph>', methods=['GET', 'POST'])
 def show_graph(table_name, graph):

@@ -68,12 +68,15 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered text-center">
                         <thead>
                             <tr>
                                 {% for each in df_column_names %}
                                 <th scope="col">{{ each }}</th>
                                 {% endfor %}
+                                {% if active != "" %}
+                                <th scope="col">ACTION</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -82,6 +85,9 @@
                                 {% for item in each %}
                                 <td>{{ item }}</td>
                                 {% endfor %}
+                                <td><a class="badge badge-primary" href="">UPDATE</a><br>
+                                    <a class="badge badge-danger mt-1" href="">DELETE</a>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
