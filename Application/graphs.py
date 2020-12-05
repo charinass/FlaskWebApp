@@ -9,8 +9,11 @@ import json
 from .models import db, Service, Device, Gateway, Connection
 
 
-def query_tables(table_name):
+def query_tables(table_name, n):
     if table_name == 'Device':
+        if n == 'all':
+            n = int(Device.query.filter(Device.dev_id).count())
+
         df = pd.DataFrame(db.session.query(
             Device.dev_id.label('Device ID'),
             Device.device_name.label('Device Name'),
@@ -19,11 +22,14 @@ def query_tables(table_name):
             Device.altitude.label('Device Altitude'),
             Device.location.label('Device Location'),
             Device.user_id.label('User ID')
-        ))
+        ).limit(n).all())
 
         return df
 
     elif table_name == 'Service':
+        if n == 'all':
+            n = int(Service.query.filter(Service.service_id).count())
+
         df = pd.DataFrame(db.session.query(
             Service.service_id.label('Service ID'),
             Service.time.label('Time'),
@@ -35,11 +41,14 @@ def query_tables(table_name):
             Service.voltage_min.label('Voltage Min [V]'),
             Service.current_max.label('Current Max'),
             Service.current_min.label('Current Min')
-        ))
+        ).limit(n).all())
 
         return df
 
     elif table_name == 'Gateway':
+        if n == 'all':
+            n = int(Gateway.query.filter(Gateway.gateway_id).count())
+
         df = pd.DataFrame(db.session.query(
             Gateway.gateway_id.label('Gateway ID'),
             Gateway.gtw_id.label('GTW ID'),
@@ -47,11 +56,14 @@ def query_tables(table_name):
             Gateway.longitude.label('Gateway Longitude'),
             Gateway.altitude.label('Gateway Altitude'),
             Gateway.location.label('Gateway Location')
-        ))
+        ).limit(n).all())
 
         return df
 
     elif table_name == 'Connection':
+        if n == 'all':
+            n = int(Connection.query.filter(Connection.conn_id).count())
+
         df = pd.DataFrame(db.session.query(
             Connection.conn_id.label('Connection ID'),
             Connection.gateway_id.label('Gateway ID'),
@@ -59,7 +71,7 @@ def query_tables(table_name):
             Connection.dev_id.label('Device ID'),
             Connection.rssi.label('RSSI'),
             Connection.snr.label('SNR')
-        ))
+        ).limit(n).all())
 
         return df
 
@@ -68,29 +80,30 @@ def query_tables(table_name):
         return pd.DataFrame()
 
 
-def create_plot():
-    df = pd.DataFrame(db.session.query(
-        Service.voltage_max,
-        Service.voltage_min,
-        Service.time).all(), columns=['Voltage Max [V]', 'Voltage Min [V]', 'Time'])
+def create_plot(table_name, df):
 
-    print(df)
+    graph_in_json = []
 
-    fig1 = px.line(df, x='Time', y=[
-                   'Voltage Max [V]', 'Voltage Min [V]'], title='Supply Voltage Graph')
+    if table_name == 'Service':
+        fig = px.line(df, x='Time', y=[
+            'Voltage Max [V]', 'Voltage Min [V]', 'Current Max', 'Current Min'])
 
-    graph_in_json = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
+        graph_in_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    elif table_name == 'Connection':
+        fig = px.line(df, x='Connection ID', y=[
+            'RSSI', 'SNR'])
+        graph_in_json = json.dumps(
+            fig, cls=plotly.utils.PlotlyJSONEncoder)
+    else:
+        graph_in_json = None
 
     return graph_in_json
 
 
-def create_hist():
-    pass
+def get_map(table_name, df):
+    if table_name == 'Device':
+        return df['Device Location']
 
-
-def get_map():
-    df = pd.DataFrame(db.session.query(
-        Device.location,
-        Gateway.location).all(), columns=['Device Location', 'Gateway Location'])
-    print(df)
-    return df['Device Location'][5]
+    elif table_name == 'Gateway':
+        return df['Gateway Location']

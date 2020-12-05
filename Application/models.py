@@ -14,7 +14,7 @@ class TTN_User(db.Model):
     topic = db.Column(db.String)
 
     def __repr__(self) -> str:
-        return f'<TTN_User {self.user_id}>'
+        return f"{self.user_id}, {self.username}, {self.password}, {self.broker}, {self.topic}"
 
 
 class Device(db.Model):
@@ -28,7 +28,7 @@ class Device(db.Model):
     user_id = db.Column(db.Integer)
 
     def __repr__(self) -> str:
-        return f'<Device {self.dev_id}>'
+        return f"{self.dev_id}, {self.device_name}, {self.latitude}, {self.longitude}, {self.altitude}, {self.location}, {self.user_id}"
 
 
 class Service(db.Model):
@@ -46,7 +46,7 @@ class Service(db.Model):
     dev_id = db.Column(db.Integer)
 
     def __repr__(self) -> str:
-        return f'<Service {self.service_id}>'
+        return f"{self.service_id}, {self.time}, {self.status}, {self.water_ml}, {self.countdown_timer}, {self.water_counter}, {self.voltage_max}, {self.voltage_min}, {self.current_max}, {self.current_min}, {self.dev_id}"
 
 
 class Gateway(db.Model):
@@ -59,7 +59,7 @@ class Gateway(db.Model):
     location = db.Column(db.String)
 
     def __repr__(self) -> str:
-        return f'<Gateway {self.gateway_id}>'
+        return f"{self.gateway_id}, {self.gtw_id}, {self.latitude}, {self.longitude}, {self.altitude}, {self.location}"
 
 
 class Connection(db.Model):
@@ -72,4 +72,4 @@ class Connection(db.Model):
     snr = db.Column(db.Float)
 
     def __repr__(self) -> str:
-        return f'<Connection {self.conn_id}>'
+        return f"{self.conn_id}, {self.gateway_id}, {self.service_id}, {self.dev_id}, {self.rssi}, {self.snr}"

@@ -14,7 +14,12 @@
     integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
     crossorigin="anonymous"></script>
 
-
+<style>
+    table {
+        font-family: 'Franklin Gothic', 'Arial Narrow', Arial, sans-serif;
+        font-size: small;
+    }
+</style>
 <title> {{ title }} </title>
 
 
@@ -66,29 +71,79 @@
                     </ul>
                 </div>
             </div>
+            {% if show_drop_down == True %}
+            <div class="row">
+                <div class="col my-4">
+                    <div class="btn-group dropright">
+                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {{ type_of_graph }}
+                        </button>
+
+                        <div class="dropdown-menu">
+                            {% if table_name == 'Device' or table_name == 'Service' or table_name == 'Gateway' or table_name == 'Connection' %}
+                            <a class="dropdown-item" href="/visualizations/{{ table_name }}/{{ 'Table' }}">Table</a>
+                            {% endif %}
+                            {% if table_name == 'Service' or table_name == 'Connection' %}
+                            <a class="dropdown-item" href="/visualizations/{{ table_name }}/{{ 'Line Plot' }}">Line
+                                Plot</a>
+                            {% endif %}
+                            {% if table_name == 'Device' or table_name == 'Gateway' %}
+                            <a class="dropdown-item" href="/visualizations/{{ table_name }}/{{ 'Map' }}">Map</a>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                    {% if n_dropdown == True %}
+                    <div class="btn-group">
+                        <button class="btn btn-outline-secondary btn-sm" type="button">
+                            {{ n }}
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary dropdown-toggle dropdown-toggle-split"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item"
+                                href="/visualizations/{{ table_name }}/{{ type_of_graph }}/{{ 1 }}"> 1
+                            </a>
+                            <a class="dropdown-item"
+                                href="/visualizations/{{ table_name }}/{{ type_of_graph }}/{{ 2 }}"> 2
+                            </a>
+                            <a class="dropdown-item"
+                                href="/visualizations/{{ table_name }}/{{ type_of_graph }}/{{ 3 }}"> 3
+                            </a>
+                            <a class="dropdown-item"
+                                href="/visualizations/{{ table_name }}/{{ type_of_graph }}/{{ 'all' }}">
+                                all </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% if show_table == True %}
             <div class="row">
                 <div class="col">
-                    <table class="table table-bordered text-center">
-                        <thead>
+                    <table class="table table-bordered table-hover table-sm">
+                        <thead class="thead-dark">
                             <tr>
-                                {% for each in df_column_names %}
-                                <th scope="col">{{ each }}</th>
+                                {% for col in table_cols %}
+                                <th class="align-middle" scope="col">{{ col }}</th>
                                 {% endfor %}
-                                {% if active != "" %}
-                                <th scope="col">ACTION</th>
-                                {% endif %}
+                                <th class="align-middle" scope="col">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for each in df_table %}
+                            {% for col in table_list %}
                             <tr>
-                                {% for item in each %}
-                                <td>{{ item }}</td>
+                                {% for row in col %}
+                                <td class="text-center align-middle">{{ row }}</td>
                                 {% endfor %}
-                                <td><a class="badge badge-primary"
-                                        href="/visualizations/update/{{ each[0] }}">UPDATE</a><br>
-                                    <a class="badge badge-danger mt-1"
-                                        href="/visualizations/delete/{{ each[0] }}">DELETE</a>
+                                <td class="text-center align-middle"><a class="btn btn-sm btn-primary w-100"
+                                        href="visualizations/update/{{ col[0] }}">UPDATE</a> <br />
+                                    <a class="btn btn-sm btn-danger mt-1 w-100"
+                                        href="/visualizations/delete/{{ col[0] }}">DELETE</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -96,38 +151,30 @@
                     </table>
                 </div>
             </div>
-            {% if active != "" %}
-            <div class="row">
-                <div class="dropdown col pt-4">
-                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        {{ graph_type }}
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <a class="dropdown-item" href="/visualizations/{{ active }}/{{ 'line_graph' }}">Line Graph</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <a class="dropdown-item" href="/visualizations/{{ active }}/{{ 'map_graph' }}">Show Location</a>
-                    </div>
-                </div>
-            </div>
             {% endif %}
+
             <div class="row chart" id="graph">
                 <script type="text/javascript">
                     var graphs = {{ plot | safe }};
                     Plotly.plot('graph', graphs, {});
                 </script>
             </div>
+
             {% if show_maps == True %}
             <div class="row">
-                <div class="embed-responsive embed-responsive-4by3 col-6">
-                    <iframe class="embed-responsive-item"
-                        src="https://maps.google.com/maps?output=embed&q={{ map_data }}" allowfullscreen>
-                    </iframe>
+                {% for each_map in map_data%}
+                <div class="col-xs-12 col-md-6 border p-3">
+                    <p class="font-italic">LOCATION: <span class="text-muted">{{ each_map }}</span></p>
+                    <div class="embed-responsive embed-responsive-4by3 border rounded">
+                        <iframe class="embed-responsive-item"
+                            src="https://maps.google.com/maps?output=embed&q={{ each_map }}" allowfullscreen>
+                        </iframe>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
             {% endif %}
         </div>
     </div>
 </div>
-
 {% endblock %}

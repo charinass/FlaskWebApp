@@ -12,6 +12,11 @@ from Application import app
 display = []
 
 
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html', back_button=True, response='404 Page not found.')
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     client.disconnect()
@@ -71,7 +76,7 @@ def add_user():
     return render_template('index.html', adduser=True, back_button=True)
 
 
-@app.route('/startReceiving', methods=['GET', 'POST'])
+@app.route('/startReceiving/', methods=['GET', 'POST'])
 def start_receive():
     if request.method == 'GET':
         username = request.args.get('username')
@@ -99,8 +104,10 @@ def start_receive():
 
             return redirect('/')
 
+    return render_template('404.html', back_button=True, response='404 Page not found.')
 
-@ app.route('/save', methods=['GET', 'POST'])
+
+@ app.route('/save/', methods=['GET', 'POST'])
 def save_data():
     if request.method == 'GET':
         user_id = request.args.get('user_id')
@@ -202,42 +209,62 @@ def save_data():
         client.disconnect()
         return redirect('/')
 
+    return render_template('404.html', back_button=True, response='404 Page not found.')
+
 
 @ app.route('/visualizations/')
 def visualize():
-    return render_template('visualizations.html', title='Visualizations', active='')
+    return render_template('visualizations.html', title='Visualizations')
 
 
-@app.route('/visualizations/<table_name>')
+@app.route('/visualizations/<table_name>/')
 def get_table(table_name):
-    df = query_tables(table_name)
-    print(df)
-    if df.empty:
-        return render_template('visualizations.html', title='Visualizations', response='Table does not exist.')
+    if table_name == 'Device' or table_name == 'Service' or table_name == 'Gateway' or table_name == 'Connection':
 
-    else:
-        df_column_names = df.columns
-        df_table = df.to_numpy(dtype=str)
+        return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, show_drop_down=True, type_of_graph='Choose Type of Graph')
 
-        return render_template('visualizations.html', title='Visualizations', active=table_name, df=df, df_column_names=df_column_names, df_table=df_table)
+    return render_template('404.html', back_button=True, response='404 Page not found.')
 
 
-@app.route('/visualizations/update/<id>')
+@app.route('/visualizations/<table_name>/<graph>/', methods=['GET', 'POST'])
+@app.route('/visualizations/<table_name>/<graph>/<n>/', methods=['GET', 'POST'])
+def show_graph(table_name, graph, n=1):
+
+    df = query_tables(table_name, n)
+
+    if graph == 'Line Plot':
+        get_line_plot = create_plot(table_name, df)
+
+        if get_line_plot == None:
+            response = 'No plot for this table.'
+
+            return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, response=response, show_drop_down=True, n_dropdown=True, n=n)
+
+        else:
+
+            return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, plot=get_line_plot, show_drop_down=True, n_dropdown=True, n=n)
+
+    elif graph == 'Map':
+        map_data = get_map(table_name, df)
+        print(map_data)
+
+        return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, show_drop_down=True, n_dropdown=True, n=n, show_maps=True, map_data=map_data)
+
+    elif graph == 'Table':
+
+        table_cols = df.columns
+        table_list = df.to_numpy(dtype=str)
+
+        return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, show_table=True, table_cols=table_cols, table_list=table_list, show_drop_down=True, n_dropdown=True, n=n)
+
+    return render_template('404.html', back_button=True, response='404 Page not found.')
+
+
+@app.route('/visualizations/update/<id>/')
 def update(id):
-    pass
+    id = int(id)
 
 
-@app.route('/visualizations/delete/<id>')
+@app.route('/visualizations/delete/<id>/')
 def delete(id):
-    pass
-
-
-@app.route('/visualizations/<table_name>/<graph>', methods=['GET', 'POST'])
-def show_graph(table_name, graph):
-    if graph == 'line_graph':
-        get_line_plot = create_plot()
-
-        return render_template('visualizations.html', title='Visualizations', graph_type='Line Graph', plot=get_line_plot)
-    elif graph == 'map_graph':
-        get_map_data = get_map()
-        return render_template('visualizations.html', title='Visualizations', graph_type='Location', show_maps=True, map_data=get_map_data)
+    id = int(id)

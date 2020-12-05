@@ -36,8 +36,8 @@ def on_message(client, userdata, msg):
     device_latitude = themsg["metadata"].get("latitude", 0.0)
     device_longitude = themsg["metadata"].get("longitude", 0.0)
     device_altitude = themsg["metadata"].get("altitude", 0.0)
-    device_location = (themsg["metadata"].get(
-        "latitude", 0.0), themsg["metadata"].get("longitude", 0.0))
+    device_location = [themsg["metadata"].get(
+        "latitude", 0.0), themsg["metadata"].get("longitude", 0.0)]
     device_info_list = [device_name, device_latitude,
                         device_longitude, device_altitude, device_location]
     device_titles = ['Device Name', 'Device Latitude',
@@ -79,13 +79,15 @@ def on_message(client, userdata, msg):
                     gtw_longitude = 0.0
                     gtw_altitude = 0.0
                     gateway_info_list.append([gtw_id, gtw_latitude,
-                                              gtw_longitude, gtw_altitude, (gtw_latitude, gtw_longitude)])
+                                              gtw_longitude, gtw_altitude,
+                                              [gtw_latitude, gtw_longitude]])
                 else:
                     gtw_latitude = each['location'].get('latitude', 0.0)
                     gtw_longitude = each['location'].get('longitude', 0.0)
                     gtw_altitude = each['location'].get('altitude', 0.0)
                     gateway_info_list.append([gtw_id, gtw_latitude,
-                                              gtw_longitude, gtw_altitude, (gtw_latitude, gtw_longitude)])
+                                              gtw_longitude, gtw_altitude,
+                                              (gtw_latitude, gtw_longitude)])
         global_list['gateway_info'][gtw_number] = dict(
             zip(gateway_titles, gateway_info_list[gtw_number]))
 
