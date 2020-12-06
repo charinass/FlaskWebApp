@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<!-- JS -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+    crossorigin="anonymous"></script>
+
+<title> {{ title }} </title>
+
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col-md-2 col-xs-12 p-0">
+            <nav class="navbar navbar-dark d-block">
+                <a class="navbar-brand" href="{{ url_for('index') }}">TTN Analysis Helper</a>
+                <div class="form-group">
+                    <input class="form-control btn btn-light" type="button" value="Go Back"
+                        onclick="history.back(-1)" />
+                </div>
+                <div class="form-group">
+                    <a name="visualize" id="visualize" class="form-control btn btn-secondary"
+                        href="{{ url_for('visualize') }}">Visualizations</a>
+                </div>
+            </nav>
+        </div>
+
+        <div class="col-md-10 col-xs-12">
+            <div class="row">
+                <div class="col">
+                    <p class="h4 mt-4 text-uppercase"> {{ response }} </p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <p class="h4 text-uppercase pt-4">For Update</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <form method='POST' class="border mx-3 p-4 col-6">
+                    <div class="form-group row">
+                        {% for key, value in data_dict.items() %}
+                        <label class="col-sm-3 col-form-label">{{ key }}</label>
+                        {% if key == 'device_name' or key == 'water_ml' or key == 'altitude' or key == 'rssi' or key == 'snr' %}
+                        <input name="{{ key }}" type="text" class="col-sm-9" placeholder="{{ value }}"
+                            value="{{ value }}">
+                        {% else %}
+                        <input name="{{ key }}" type="text" class="col-sm-9" placeholder="{{ value }}"
+                            value="{{ value }}" disabled>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="form-group row">
+                        <input name="update_btn" type="submit" class="btn btn-outline-success mx-auto"
+                            value="SAVE UPDATE">
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

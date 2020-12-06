@@ -1,15 +1,14 @@
-import plotly
-import plotly.express as px
-import plotly.graph_objs as graph_obj
-
-import pandas as pd
-import numpy as np
 import json
+import pandas as pd
+import plotly.express as px
+import plotly
+
 
 from .models import db, Service, Device, Gateway, Connection
 
 
 def query_tables(table_name, n):
+
     if table_name == 'Device':
         if n == 'all':
             n = int(Device.query.filter(Device.dev_id).count())

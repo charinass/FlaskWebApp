@@ -125,30 +125,36 @@
             {% if show_table == True %}
             <div class="row">
                 <div class="col">
-                    <table class="table table-bordered table-hover table-sm">
-                        <thead class="thead-dark">
-                            <tr>
-                                {% for col in table_cols %}
-                                <th class="align-middle" scope="col">{{ col }}</th>
+                    <form method='POST'>
+                        <table id="{{ table_name }}" name="{{ table_name }}"
+                            class="table table-bordered table-hover table-sm">
+                            <thead class="thead-dark">
+                                <tr>
+                                    {% for col in table_cols %}
+                                    <th id="{{ col }}" name="{{ col }}" class="align-middle" scope="col">{{ col }}</th>
+                                    {% endfor %}
+                                    <th class="align-middle" scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for col in table_list %}
+                                <tr>
+                                    {% for row in col %}
+                                    <td class="text-center align-middle">
+                                        {{ row }}</td>
+                                    {% endfor %}
+                                    <td class="text-center align-middle">
+                                        <a id="update_btn" name="update_btn" class="btn btn-sm btn-primary w-100"
+                                            href="/update/{{ table_name }}/{{ col[0] }}/">UPDATE</a>
+                                        <br />
+                                        <a class="btn btn-sm btn-danger mt-1 w-100"
+                                            href="/visualizations/{{ table_name }}/delete/{{ col[0] }}/">DELETE</a>
+                                    </td>
+                                </tr>
                                 {% endfor %}
-                                <th class="align-middle" scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for col in table_list %}
-                            <tr>
-                                {% for row in col %}
-                                <td class="text-center align-middle">{{ row }}</td>
-                                {% endfor %}
-                                <td class="text-center align-middle"><a class="btn btn-sm btn-primary w-100"
-                                        href="visualizations/update/{{ col[0] }}">UPDATE</a> <br />
-                                    <a class="btn btn-sm btn-danger mt-1 w-100"
-                                        href="/visualizations/delete/{{ col[0] }}">DELETE</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </form>
                 </div>
             </div>
             {% endif %}

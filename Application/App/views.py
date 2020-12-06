@@ -1,4 +1,4 @@
-from flask import render_template, request
+from flask import render_template, request, abort
 from flask.helpers import url_for
 from markupsafe import Markup
 from werkzeug.utils import redirect
@@ -52,6 +52,7 @@ def add_user():
                 report = f'User {new_username} does not exist in The Things Network. New user not saved. Register ' + \
                     Markup(
                         "<a href='https://account.thethingsnetwork.org/register' target='_blank'>Here</a>")
+
             elif check_username_valid() == True:
                 if (TTN_User.query.filter(new_username == TTN_User.username).first()) is not None:
                     report = f'User {new_username} already exist.'
@@ -70,10 +71,12 @@ def add_user():
 
                     except:
                         print("Error adding to table TTN_User.")
+            else:
+                report = 'There was an error in your request.'
 
             return render_template('index.html', adduser=True, back_button=True, new_username=new_username, new_passphrase=new_passphrase, new_broker=new_broker, new_topic=new_topic, report=report)
-
-    return render_template('index.html', adduser=True, back_button=True)
+    else:
+        return render_template('index.html', adduser=True, back_button=True)
 
 
 @app.route('/startReceiving/', methods=['GET', 'POST'])
@@ -86,30 +89,26 @@ def start_receive():
         global display
         display = get_data()
 
-        return render_template('index.html', title='Device Page', refresh=True, success='success', username=username, user_id=user_id, response=response, device_info=display[0], service_info=display[1], gateway_info=display[2], connection_info=display[3])
+        return render_template('index.html', title='Device Page', refresh=True, success='success', username=username, user_id=user_id, response=response, device_info=display[0], service_info=display[1], gateway_info=display[2], connection_info=display[3], back_button=True)
 
     elif request.method == 'POST':
         if request.form.get('stop'):
             client.disconnect()
 
-            return render_template('index.html', title='Device Page', success='success', stop_connect='disabled', device_info=display[0], service_info=display[1], gateway_info=display[2], connection_info=display[3])
+            return render_template('index.html', title='Device Page', success='success', stop_connect='disabled', device_info=display[0], service_info=display[1], gateway_info=display[2], connection_info=display[3], back_button=True)
 
         elif request.form.get('save'):
             user_id = request.args.get('user_id')
 
             return redirect(url_for('save_data', user_id=user_id))
 
-        elif request.form.get('stop_back'):
-            client.disconnect()
-
-            return redirect('/')
-
-    return render_template('404.html', back_button=True, response='404 Page not found.')
+    else:
+        abort(404)
 
 
-@ app.route('/save/', methods=['GET', 'POST'])
+@app.route('/save/', methods=['GET', 'POST'])
 def save_data():
-    if request.method == 'GET':
+    if len(display) > 0:
         user_id = request.args.get('user_id')
         client.disconnect()
 
@@ -199,20 +198,22 @@ def save_data():
                 try:
                     db.session.add(new_connection_data)
                     db.session.commit()
+
+                    response = 'New data successfully saved to database.'
+
+                    return render_template('index.html', title='Device Page', success='success', refresh=False, stop_connect='disabled', save_button='disabled', empty=True, response=response, back_button=True)
+
                 except ValueError:
                     print("Error adding to table Connection.")
         else:
             response = 'Tables are empty. Could not save any data.'
-            return render_template('index.html', title='Device Page', success='success', refresh=False, stop_connect='disabled', save_button='disabled', empty=True, response=response)
+            return render_template('index.html', title='Device Page', success='success', refresh=False, stop_connect='disabled', save_button='disabled', empty=True, response=response, back_button=True)
 
-    elif request.form.get('stop_back'):
-        client.disconnect()
-        return redirect('/')
-
-    return render_template('404.html', back_button=True, response='404 Page not found.')
+    else:
+        abort(404)
 
 
-@ app.route('/visualizations/')
+@app.route('/visualizations/')
 def visualize():
     return render_template('visualizations.html', title='Visualizations')
 
@@ -223,10 +224,11 @@ def get_table(table_name):
 
         return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, show_drop_down=True, type_of_graph='Choose Type of Graph')
 
-    return render_template('404.html', back_button=True, response='404 Page not found.')
+    else:
+        abort(404)
 
 
-@app.route('/visualizations/<table_name>/<graph>/', methods=['GET', 'POST'])
+@app.route('/visualizations/<table_name>/<graph>/')
 @app.route('/visualizations/<table_name>/<graph>/<n>/', methods=['GET', 'POST'])
 def show_graph(table_name, graph, n=1):
 
@@ -257,14 +259,94 @@ def show_graph(table_name, graph, n=1):
 
         return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, show_table=True, table_cols=table_cols, table_list=table_list, show_drop_down=True, n_dropdown=True, n=n)
 
-    return render_template('404.html', back_button=True, response='404 Page not found.')
+    return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, show_drop_down=True, n_dropdown=True)
 
 
-@app.route('/visualizations/update/<id>/')
-def update(id):
+@app.route('/update/<table_name>/<update_id>/', methods=['GET', 'POST'])
+def update(table_name, update_id):
+
+    if table_name == 'Device':
+        update_data = Device.query.get_or_404(update_id)
+        data_list = [update_data.dev_id, update_data.device_name, update_data.latitude,
+                     update_data.longitude, update_data.altitude, update_data.location, update_data.user_id]
+        col_list = Device.__table__.columns.keys()
+        data_dict = dict(zip(col_list, data_list))
+
+    elif table_name == 'Service':
+        update_data = Service.query.get_or_404(update_id)
+        data_list = [update_data.service_id, update_data.time, update_data.status, update_data.water_ml, update_data.countdown_timer,
+                     update_data.water_counter, update_data.voltage_max, update_data.voltage_min, update_data.current_max, update_data.current_min, update_data.dev_id]
+        col_list = Service.__table__.columns.keys()
+        data_dict = dict(zip(col_list, data_list))
+
+    elif table_name == 'Gateway':
+        update_data = Gateway.query.get_or_404(update_id)
+        data_list = [update_data.gateway_id, update_data.gtw_id, update_data.latitude,
+                     update_data.longitude, update_data.altitude, update_data.location]
+        col_list = Gateway.__table__.columns.keys()
+        data_dict = dict(zip(col_list, data_list))
+
+    elif table_name == 'Connection':
+        update_data = Connection.query.get_or_404(update_id)
+        data_list = [update_data.conn_id, update_data.gateway_id, update_data.service_id,
+                     update_data.dev_id, update_data.rssi, update_data.snr]
+        col_list = Connection.__table__.columns.keys()
+        data_dict = dict(zip(col_list, data_list))
+
+    else:
+        abort(404)
+
+    if request.method == 'POST':
+        if table_name == 'Device':
+            update_data.device_name = request.form['device_name']
+            update_data.altitude = request.form['altitude']
+
+        elif table_name == 'Service':
+            update_data.water_ml = request.form['water_ml']
+
+        elif table_name == 'Gateway':
+            update_data.altitude = request.form['altitude']
+
+        elif table_name == 'Connection':
+            update_data.rssi = request.form['rssi']
+            update_data.snr = request.form['snr']
+        else:
+            abort(404)
+        try:
+            db.session.commit()
+            return render_template('update.html', title='Update', response=f'Successfully edited fields in {table_name}', data_dict=data_dict)
+        except:
+            return render_template('update.html', title='Update', response=f'Error editing the table {table_name}', data_dict=data_dict)
+    else:
+        return render_template('update.html', title='Update', table_name=table_name, data_dict=data_dict)
+
+
+@ app.route('/visualizations/<table_name>/delete/<id>/')
+def delete(table_name, id):
+
     id = int(id)
 
+    if table_name == 'Device':
+        to_delete = Device.query.get_or_404(id)
 
-@app.route('/visualizations/delete/<id>/')
-def delete(id):
-    id = int(id)
+    elif table_name == 'Service':
+        to_delete = Service.query.get_or_404(id)
+
+    elif table_name == 'Gateway':
+        to_delete = Gateway.query.get_or_404(id)
+
+    elif table_name == 'Connection':
+        to_delete = Connection.query.get_or_404(id)
+
+    else:
+        to_delete = ''
+
+    try:
+        db.session.delete(to_delete)
+        db.session.commit()
+
+        return render_template('visualizations.html', response='Data successfully deleted.')
+
+    except:
+
+        return render_template('visualizations.html', response='There was a problem deleting that task')
