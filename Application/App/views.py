@@ -248,7 +248,6 @@ def show_graph(table_name, graph, n=1):
 
     elif graph == 'Map':
         map_data = get_map(table_name, df)
-        print(map_data)
 
         return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, show_drop_down=True, n_dropdown=True, n=n, show_maps=True, map_data=map_data)
 
