@@ -247,9 +247,10 @@ def show_graph(table_name, graph, n=1):
             return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, plot=get_line_plot, show_drop_down=True, n_dropdown=True, n=n)
 
     elif graph == 'Map':
-        map_data = get_map(table_name, df)
+        map_ids, map_data = get_map(table_name, df)
+        map_dict = dict(zip(map_ids, map_data))
 
-        return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, show_drop_down=True, n_dropdown=True, n=n, show_maps=True, map_data=map_data)
+        return render_template('visualizations.html', title='Visualizations', active=table_name, table_name=table_name, type_of_graph=graph, show_drop_down=True, n_dropdown=True, n=n, show_maps=True, map_dict=map_dict)
 
     elif graph == 'Table':
 

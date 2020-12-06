@@ -168,12 +168,13 @@
 
             {% if show_maps == True %}
             <div class="row">
-                {% for each_map in map_data%}
+                {% for id, loc in map_dict.items() %}
                 <div class="col-xs-12 col-md-6 border p-3">
-                    <p class="font-italic">LOCATION: <span class="text-muted">{{ each_map }}</span></p>
+                    <p class="font-italic">ID: <span class="text-muted">{{ id }}</span></p>
+                    <p class="font-italic">LOCATION: <span class="text-muted">{{ loc }}</span></p>
                     <div class="embed-responsive embed-responsive-4by3 border rounded">
                         <iframe class="embed-responsive-item"
-                            src="https://maps.google.com/maps?output=embed&q={{ each_map }}" allowfullscreen>
+                            src="https://maps.google.com/maps?output=embed&q={{ loc }}" allowfullscreen>
                         </iframe>
                     </div>
                 </div>

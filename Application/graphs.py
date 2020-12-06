@@ -102,7 +102,7 @@ def create_plot(table_name, df):
 
 def get_map(table_name, df):
     if table_name == 'Device':
-        return df['Device Location']
+        return df['Device Name'], df['Device Location']
 
     elif table_name == 'Gateway':
-        return df['Gateway Location']
+        return df['GTW ID'], df['Gateway Location']
